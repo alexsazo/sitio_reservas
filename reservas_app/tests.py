@@ -25,7 +25,7 @@ class DocenteTest(TestCase):
 
         solicitud = self.docente.solicitar_reserva(**data)
         self.assertIsNotNone(solicitud.pk)
-        self.assertEqual(solicitud.comiendo, data['comienzo'])
+        self.assertEqual(solicitud.comienzo, data['comienzo'])
         self.assertEqual(solicitud.fin, data['fin'])
         self.assertEqual(solicitud.asignatura, data['asignatura'])
         self.assertEqual(solicitud.sala, data['sala'])
