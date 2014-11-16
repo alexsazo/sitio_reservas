@@ -2,4 +2,5 @@ from django.test import TestCase
 
 
 class DocenteTest(TestCase):
-    pass
+    def test_solicitar_reserva(self):
+        pass
