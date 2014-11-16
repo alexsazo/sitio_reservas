@@ -1,5 +1,6 @@
 # coding: utf-8
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from django.utils.timezone import now, timedelta
 from model_mommy import mommy
 
@@ -10,16 +11,16 @@ class DocenteTest(TestCase):
         self.asignatura = mommy.make('Asignatura', docente=self.docente)
         self.sala = mommy.make('Sala')
 
+        self.right_now = now()
+        self.hour = timedelta(hours=1)
+
     def test_solicitar_reserva(self):
         """
         Prueba el método Docente.solicitar_reserva. Este método recibe
         los datos de la solicitud y devuelve un nuevo objeto de solicitud
         """
-        right_now = now()
-        hour = timedelta(hours=1)
-
-        data = {'comienzo': right_now,
-                'fin': right_now+hour,
+        data = {'comienzo': self.right_now,
+                'fin': self.right_now+self.hour,
                 'asignatura': self.asignatura,
                 'sala': self.sala}
 
@@ -30,3 +31,12 @@ class DocenteTest(TestCase):
         self.assertEqual(solicitud.asignatura, data['asignatura'])
         self.assertEqual(solicitud.sala, data['sala'])
         self.assertFalse(solicitud.vigente)
+
+    def test_solicitar_reserva_con_fechas_severla(self):
+        data = {'comienzo': self.right_now+self.hour,
+                'fin': self.right_now,
+                'asignatura': self.asignatura,
+                'sala': self.sala}
+
+        with self.assertRaises(ValidationError):
+            self.docente.solicitar_reserva(**data)
