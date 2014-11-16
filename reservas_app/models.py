@@ -22,15 +22,8 @@ class Docente(User):
     rut = models.CharField(max_length=11, primary_key=True)
     facultad = models.ForeignKey('Facultad')
 
-    def solicitar_reserva(comienzo, fin, serie, asignatura, sala):
-        r = Reserva()
-        r.comienzo = datetime(comienzo)
-        r.fin = datetime(fin)
-        r.serie = serie
-        r.asignatura = asignatura
-        r.sala = sala
-        r.vigente = False
-        r.save()
+    def solicitar_reserva(self, **kwargs):
+        return Reserva.objects.create(**kwargs)
     # def __unicode__(self):
     #     return self.run + ' - ' + self.nombres + ' ' + self.apellidos
 
