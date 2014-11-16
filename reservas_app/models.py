@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager
 from model_utils.managers import InheritanceManager
+from django.utils.timezone import now, timedelta, datetime
 
 
 class UserInheritanceManager(InheritanceManager, UserManager):
@@ -21,15 +22,14 @@ class Docente(User):
     rut = models.CharField(max_length=11, primary_key=True)
     facultad = models.ForeignKey('Facultad')
 
-    def solicitar_reserva(self, comienzo, fin, serie, asignatura, sala):
+    def solicitar_reserva(comienzo, fin, serie, asignatura, sala):
         r = Reserva()
-        r.comienzo = comienzo
-        r.fin = fin
+        r.comienzo = datetime(comienzo)
+        r.fin = datetime(fin)
         r.serie = serie
         r.asignatura = asignatura
         r.sala = sala
         r.vigente = False
-        r.docente = self
         r.save()
     # def __unicode__(self):
     #     return self.run + ' - ' + self.nombres + ' ' + self.apellidos
@@ -42,7 +42,6 @@ class Reserva(models.Model):
     asignatura = models.ForeignKey('Asignatura')
     sala = models.ForeignKey('Sala')
     vigente = models.BooleanField(default=False)
-    docente = models.ForeignKey('Docente')
 
     def __unicode__(self):
         return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre + ' - ' + self.docente.get_full_name()
