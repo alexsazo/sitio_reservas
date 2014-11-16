@@ -90,3 +90,5 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
 
+# Rainbow test runner
+TEST_RUNNER = 'rainbowtests.test.runner.RainbowDiscoverRunner'
