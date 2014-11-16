@@ -31,6 +31,7 @@ class Reserva(models.Model):
     serie = models.BooleanField(default=False)
     asignatura = models.ForeignKey('Asignatura')
     sala = models.ForeignKey('Sala')
+    vigente = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre

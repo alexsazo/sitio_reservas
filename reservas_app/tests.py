@@ -10,6 +10,10 @@ class DocenteTest(TestCase):
         self.sala = mommy.make('Sala')
 
     def test_solicitar_reserva(self):
+        """
+        Prueba el método Docente.solicitar_reserva. Este método recibe
+        los datos de la solicitud y devuelve un nuevo objeto de solicitud
+        """
         right_now = now()
         hour = timedelta(hours=1)
 
@@ -24,3 +28,4 @@ class DocenteTest(TestCase):
         self.assertEqual(solicitud.fin, data['fin'])
         self.assertEqual(solicitud.asignatura, data['asignatura'])
         self.assertEqual(solicitud.sala, data['sala'])
+        self.assertFalse(solicitud.vigente)
