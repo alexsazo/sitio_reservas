@@ -3,7 +3,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from reservas_app.models import Sala, Reserva
 
 # Create your views here.
 def iniciar_sesion(request):
@@ -45,7 +46,18 @@ def cerrar_sesion(request):
 def profile(request):
     return render(request, 'reservas_app/profile.html')
 
+@login_required()
+def sala(request, sala_id):
+    sala = get_object_or_404(Sala, pk=sala_id)
+    list_reservas = Reserva.objects.filter(sala=sala_id)
+
+    return render(request, 'reservas_app/sala_detail.html', {'sala': sala})
+
+@login_required()
 def buscarSala(request):
-    #if request.method = "POST"
-    #salas =
-    return render(request, 'reservas_app/profile.html', {'salas' : salas})
+    if request.method == "POST":
+        salas = Sala.objects.filter(nombre__icontains=request.POST['busqueda'])
+        return render(request, 'reservas_app/find.html', {'salas' : salas})
+    return render(request, 'reservas_app/find.html',{'salas': None})
+
+

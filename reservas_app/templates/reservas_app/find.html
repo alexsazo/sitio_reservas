@@ -1,0 +1,7 @@
+{% extends 'reservas_app/base.html' %}
+
+{% block content %}
+    {% for sala in salas %}
+        <li><a href="{% url 'sala' sala.id %}">{{ sala.nombre }}</a> </li>
+    {% endfor %}
+{% endblock content %}
