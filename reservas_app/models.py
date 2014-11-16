@@ -1,5 +1,28 @@
 # coding: utf-8
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager
+from model_utils.managers import InheritanceManager
+
+
+class UserInheritanceManager(InheritanceManager, UserManager):
+    pass
+
+
+class User(AbstractUser):
+    objects = UserInheritanceManager()
+
+
+class Jefazo(User):
+    objects = UserInheritanceManager()
+
+
+class Docente(User):
+    rut = models.CharField(max_length=11, primary_key=True)
+    facultad = models.ForeignKey('Facultad')
+
+    # def __unicode__(self):
+    #     return self.run + ' - ' + self.nombres + ' ' + self.apellidos
 
 
 class Reserva(models.Model):
@@ -23,24 +46,17 @@ class Asignatura(models.Model):
 
 
 class Sala(models.Model):
+    NORMAL = 1
+
+    TIPO_CHOICES = ((NORMAL, 'Normal'),)
+
+    F_INGENIERIA = 1
+    EDIFICIO_CHOICES = ((F_INGENIERIA, 'Facultad de Ingeniería'),)
+
     nombre = models.CharField(max_length=50)
-    edificio = models.ForeignKey('Edificio')
-    tipo = models.ForeignKey('Sala_tipo')
-    capacidad = models.IntegerField()
-
-    def __unicode__(self):
-        return self.nombre
-
-
-class Sala_tipo(models.Model):
-    nombre = models.CharField(max_length=30)
-
-    def __unicode__(self):
-        return self.nombre
-
-
-class Edificio(models.Model):
-    nombre = models.CharField(max_length=10)
+    edificio = models.PositiveSmallIntegerField(choices=EDIFICIO_CHOICES, default=F_INGENIERIA)
+    tipo = models.PositiveSmallIntegerField(choices=TIPO_CHOICES, default=NORMAL)
+    capacidad = models.PositiveSmallIntegerField(default=0)
 
     def __unicode__(self):
         return self.nombre
@@ -55,16 +71,6 @@ class Solicitud(models.Model):
 
     def __unicode__(self):
         return str(self.sala) + ' - ' + str(self.comienzo) + ' - ' + str(self.docente)
-
-
-class Docente(models.Model):
-    run = models.CharField(max_length=11, primary_key=True)
-    nombres = models.CharField(max_length=50)
-    apellidos = models.CharField(max_length=50)
-    facultad = models.ForeignKey('Facultad')
-
-    def __unicode__(self):
-        return self.run + ' - ' + self.nombres + ' ' + self.apellidos
 
 
 class Facultad(models.Model):

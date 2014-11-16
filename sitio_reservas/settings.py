@@ -26,6 +26,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Auth
+AUTH_USER_MODEL = 'reservas_app.User'
 
 # Application definition
 
