@@ -1,3 +1,4 @@
+# coding: utf-8
 from django.test import TestCase
 from django.utils.timezone import now, timedelta
 from model_mommy import mommy
