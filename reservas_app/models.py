@@ -39,7 +39,7 @@ class Reserva(models.Model):
     comienzo = models.DateTimeField()
     fin = models.DateTimeField()
     serie = models.BooleanField(default=False)
-    asignatura = models.ForeignKey('Asignatura')
+    asignatura = models.ForeignKey('Asignatura', null=True, blank=True)
     sala = models.ForeignKey('Sala')
     vigente = models.BooleanField(default=False)
 
