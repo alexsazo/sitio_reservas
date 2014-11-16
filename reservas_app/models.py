@@ -21,6 +21,16 @@ class Docente(User):
     rut = models.CharField(max_length=11, primary_key=True)
     facultad = models.ForeignKey('Facultad')
 
+    def solicitar_reserva(self, comienzo, fin, serie, asignatura, sala):
+        r = Reserva()
+        r.comienzo = comienzo
+        r.fin = fin
+        r.serie = serie
+        r.asignatura = asignatura
+        r.sala = sala
+        r.vigente = False
+        r.docente = self
+        r.save()
     # def __unicode__(self):
     #     return self.run + ' - ' + self.nombres + ' ' + self.apellidos
 
@@ -32,9 +42,10 @@ class Reserva(models.Model):
     asignatura = models.ForeignKey('Asignatura')
     sala = models.ForeignKey('Sala')
     vigente = models.BooleanField(default=False)
+    docente = models.ForeignKey('Docente')
 
     def __unicode__(self):
-        return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre
+        return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre + ' - ' + self.docente.get_full_name()
 
 
 class Asignatura(models.Model):
