@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
 from model_utils.managers import InheritanceManager
 from django.utils.timezone import now, timedelta, datetime
 
@@ -23,7 +25,10 @@ class Docente(User):
     facultad = models.ForeignKey('Facultad')
 
     def solicitar_reserva(self, **kwargs):
-        return Reserva.objects.create(**kwargs)
+        if kwargs['comienzo'] < kwargs['fin']:
+            return Reserva.objects.create(**kwargs)
+        else:
+            raise ValidationError(_(u'Las fechas no son válidas.'), code='invalid')
     # def __unicode__(self):
     #     return self.run + ' - ' + self.nombres + ' ' + self.apellidos
 
