@@ -6,7 +6,21 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect, get_object_or_404
 from reservas_app.models import Sala, Reserva
 
-# Create your views here.
+from django.utils.timezone import now, timedelta, datetime
+
+VERBOSE_DAYS = {
+    'LUNES':0,
+    'MARTES':1,
+    'MIERCOLES':2,
+    'JUEVES':3,
+    'VIERNES':4,
+    'SABADO':5,
+    'DOMINGO':6,
+}
+
+INICIO_SEMANA = VERBOSE_DAYS['LUNES']
+TERMINO_SEMANA = VERBOSE_DAYS['VIERNES']
+
 def iniciar_sesion(request):
     if request.method == "POST":
         formulario = AuthenticationForm(request.POST)
@@ -60,4 +74,13 @@ def buscarSala(request):
         return render(request, 'reservas_app/find.html', {'salas' : salas})
     return render(request, 'reservas_app/find.html',{'salas': None})
 
+def get_allReservas_from_week(fecha=now(), sala_def=None, docente_def=None):
+    lunes = fecha - timedelta(days=(fecha.weekday()-INICIO_SEMANA))
+    viernes = fecha + timedelta(days=(TERMINO_SEMANA - fecha.weekday()))
 
+    if sala_def != None and docente_def != None:
+        return None
+    if sala_def != None:
+        return Reserva.objects.filter(sala=sala_def, comienzo__gte=lunes, comienzo__lte=viernes)
+    if docente_def != None:
+        return  Reserva.objects.filter(docente=docente_def, comienzo__gte=lunes, comienzo__lte=viernes)

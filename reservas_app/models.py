@@ -8,6 +8,7 @@ from model_utils.managers import InheritanceManager
 from django.utils.timezone import now, timedelta, datetime
 
 
+
 class UserInheritanceManager(InheritanceManager, UserManager):
     pass
 
@@ -42,11 +43,10 @@ class Reserva(models.Model):
     vigente = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre + ' - ' + self.docente.get_full_name()
-
+        return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre + ' - ' + self.asignatura.docente.get_full_name()
 
 class Asignatura(models.Model):
-    codigo = models.CharField(max_length=15, primary_key=True)
+    codigo = models.CharField(max_length=15, primary_key=True, unique=True)
     nombre = models.CharField(max_length=50)
     docente = models.ForeignKey('Docente')
 
@@ -59,11 +59,17 @@ class Sala(models.Model):
 
     TIPO_CHOICES = ((NORMAL, 'Normal'),)
 
-    F_INGENIERIA = 1
-    EDIFICIO_CHOICES = ((F_INGENIERIA, 'Facultad de Ingeniería'),)
+    AULAS_A = 1
+    AULAS_B = 2
+    AULAS_C = 3
 
-    nombre = models.CharField(max_length=50)
-    edificio = models.PositiveSmallIntegerField(choices=EDIFICIO_CHOICES, default=F_INGENIERIA)
+    EDIFICIO_CHOICES = ((AULAS_A, 'Aulas B'),
+                        (AULAS_B, 'Aulas A'),
+                        (AULAS_C, 'Aulas C'),
+    )
+
+    nombre = models.CharField(max_length=50, unique=True)
+    edificio = models.PositiveSmallIntegerField(choices=EDIFICIO_CHOICES, default=AULAS_A)
     tipo = models.PositiveSmallIntegerField(choices=TIPO_CHOICES, default=NORMAL)
     capacidad = models.PositiveSmallIntegerField(default=0)
 
@@ -90,14 +96,18 @@ class Facultad(models.Model):
 
 
 class Configuracion(models.Model):
-    inicio_bloque_matutino = models.DateTimeField(verbose_name="Inicio de bloque matutino")
+    duracion_hora_academica = models.IntegerField(max_length=2, default=45, verbose_name=u"Duración hora académica (minutos)")
+    inicio_bloque_matutino = models.TimeField(verbose_name="Inicio de bloque matutino")
     q_bloque_matutino = models.IntegerField(verbose_name="Cantidad de horas por bloque")
-    inicio_bloque_vespertino = models.DateTimeField(verbose_name="Inicio de bloque vespertino")
+    inicio_bloque_vespertino = models.TimeField(verbose_name="Inicio de bloque vespertino")
     q_bloque_vespertino = models.IntegerField(verbose_name="Cantidad de horas por bloque")
     periodo = models.ForeignKey('Periodo')
 
     def __unicode__(self):
-        return str(self.pk) + " - " + str(self.periodo)
+        return str(self.duracion_hora_academica) + "min" + " - " + str(self.periodo)
+
+    def get_hora_academica(self):
+        return self.inicio_bloque_matutino
 
 
 class Periodo(models.Model):
