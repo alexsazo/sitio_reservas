@@ -6,6 +6,7 @@
 
 {% block content %}
     <h1 class="page-header" align="center">{{ docente.get_full_name }}</h1>
+{% if reservas_list %}
 <h2 class="sub-header" align="center">Horario</h2>
 <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover table-sortable">
@@ -38,5 +39,6 @@
         {% endfor %}
         </tbody>
     </table>
+{% endif %}
 </div>
 {% endblock content %}

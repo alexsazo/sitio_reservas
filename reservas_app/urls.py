@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from reservas_app.views import DocenteListView
 
 urlpatterns = patterns('reservas_app.views',
     url(r'^$', 'home', name='home'),
@@ -6,6 +7,7 @@ urlpatterns = patterns('reservas_app.views',
     url(r'^docente/(?P<docente_id>\d+)/$', 'docente_detalle', name='docente_detalle'),
     url(r'^asignatura/(?P<asignatura_id>\w+)/$', 'asignatura_detalle', name='asignatura_detalle'),
     url(r'^/?P<docente_id>\d+/solicitar/$', 'solicitar_sala', name='solicitar_sala'),
+    url(r'^docentes/$', DocenteListView.as_view(), name='docentes'),
     url(r'^profile/$', 'profile', name='profile'),
     url(r'^login/$', 'iniciar_sesion', name='login'),
     url(r'^logout/$' , 'cerrar_sesion', name='logout'),

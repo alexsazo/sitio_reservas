@@ -1,4 +1,5 @@
 # coding: utf-8
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager
@@ -41,6 +42,11 @@ class Jefazo(User):
 class Docente(User):
     rut = models.CharField(max_length=11, primary_key=True)
     facultad = models.ForeignKey('Facultad')
+
+    USERNAME_FIELD = 'username'
+
+    def get_absolute_url(self):
+        return reverse('docente_detalle', kwargs={'docente_id': self.id})
 
     def solicitar_reserva(self, **kwargs):
         if kwargs['comienzo'] < kwargs['fin']:

@@ -28,6 +28,9 @@ ALLOWED_HOSTS = []
 
 # Auth
 AUTH_USER_MODEL = 'reservas_app.User'
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
+                           #'reservas_app.auth_backends',
+                           )
 
 # Application definition
 
@@ -42,6 +45,7 @@ INSTALLED_APPS = (
     'reservas_app',
     'django_bootstrap_calendar',
     'activelink',
+    'bootstrap_pagination'
 )
 
 MIDDLEWARE_CLASSES = (

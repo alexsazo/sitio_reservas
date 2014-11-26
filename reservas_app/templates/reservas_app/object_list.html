@@ -1,0 +1,43 @@
+{% extends 'reservas_app/base.html' %}
+{% load bootstrap_pagination %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+
+            <div class="panel panel-primary">
+                <div class="panel-heading"> <h1 class="panel-title"> {% block object_list_title %}
+                {% endblock %}  </h1> </div>
+                <div class="panel-body">
+                    <form role="form" method="GET">
+                        <div class="row">
+                        <div class="col-md-5">
+                        <div class="input-group custom-search-form">
+                            <input type="text" class="form-control" name="q" placeholder="{% block placeholder_buscar %} {% endblock %}">
+                            <span class="input-group-btn">
+                            <button class="btn btn-info" type="submit">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                            </span>
+                        </div><!-- /input-group -->
+                        </div>
+                        </div>
+                    </form>
+                    {% if is_filter %}
+                        <a href="{{ request.path }}"> Quitar Filtro</a>
+                    {% endif %}
+                    <hr>
+
+                    {% block object_list_content %}
+                        <ul class="list-group">
+                            {% for object in object_list  %}
+                                <a class="list-group-item" href="{{ object.get_absolute_url }}"> {{ object|safe }} </a>
+                            {% endfor %}
+                        </ul>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

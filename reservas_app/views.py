@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from reservas_app.forms import ReservaForm
 from reservas_app.models import Sala, Reserva, Configuracion, Periodo, Docente, Asignatura
 from django.views.generic import ListView, CreateView
+from reservas_app.mixins import *
 
 from django.utils.timezone import now, timedelta, datetime, make_aware, localtime, get_default_timezone
 
@@ -33,10 +34,14 @@ DAYS_TO_STRING = {
 INICIO_SEMANA = DAYS_TO_ID['LUNES']
 TERMINO_SEMANA = DAYS_TO_ID['VIERNES']
 
-class DocenteListView(ListView):
+
+class DocenteListView(SearchableListMixin, ListView):
     model = Docente
     template_name = 'reservas_app/lista_docentes.html'
 
+class SalaListView(ListView):
+    model = Sala
+    template_name = 'reservas_app/lista_salas.html'
 
 def iniciar_sesion(request):
     if request.method == "POST":
@@ -119,8 +124,11 @@ def sala_detalle(request, sala_id):
 @login_required()
 def docente_detalle(request, docente_id):
     docente = get_object_or_404(Docente, id=docente_id)
-    list = get_all_reservas_from_week(docente_def=docente.pk)
-    list_reservas = reservas_to_format(list)
+    if Asignatura.objects.filter(docente=docente):
+        list = get_all_reservas_from_week(docente_def=docente.pk)
+        list_reservas = reservas_to_format(list)
+    else:
+        list_reservas = None
     return render(request, 'reservas_app/docente_detalle.html', {'docente': docente, 'reservas_list': list_reservas})
 
 @login_required()

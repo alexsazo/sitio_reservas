@@ -1,0 +1,13 @@
+{% extends 'reservas_app/object_list.html' %}
+
+{% block title_page %}
+ Lista de Docentes
+{% endblock %}
+
+{% block object_list_title %}
+Clientes <span class="badge"> {{ object_list|length }} </span> <button class="btn btn-success"> <span class="glyphicon-plus"></span> Añadir</button>
+{% endblock %}
+
+{% block object_detail_message %}
+Seleccione un <strong> cliente </strong> del panel izquierdo.
+{% endblock %}
