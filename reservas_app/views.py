@@ -4,11 +4,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect, get_object_or_404
-from reservas_app.models import Sala, Reserva
+from reservas_app.models import Sala, Reserva, Configuracion, Periodo
 
-from django.utils.timezone import now, timedelta, datetime
+from django.utils.timezone import now, timedelta, datetime, make_aware, localtime, get_default_timezone
 
-VERBOSE_DAYS = {
+UTC_ADJUST = timedelta(hours=3)
+DAYS_TO_ID = {
     'LUNES':0,
     'MARTES':1,
     'MIERCOLES':2,
@@ -17,9 +18,18 @@ VERBOSE_DAYS = {
     'SABADO':5,
     'DOMINGO':6,
 }
+DAYS_TO_STRING = {
+    0:'LUNES',
+    1:'MARTES',
+    2:'MIERCOLES',
+    3:'JUEVES',
+    4:'VIERNES',
+    5:'SABADO',
+    6:'DOMINGO',
+}
 
-INICIO_SEMANA = VERBOSE_DAYS['LUNES']
-TERMINO_SEMANA = VERBOSE_DAYS['VIERNES']
+INICIO_SEMANA = DAYS_TO_ID['LUNES']
+TERMINO_SEMANA = DAYS_TO_ID['VIERNES']
 
 def iniciar_sesion(request):
     if request.method == "POST":
@@ -63,9 +73,8 @@ def profile(request):
 @login_required()
 def sala(request, sala_id):
     sala = get_object_or_404(Sala, pk=sala_id)
-    list_reservas = Reserva.objects.filter(sala=sala_id)
-
-    return render(request, 'reservas_app/sala_detail.html', {'sala': sala})
+    list_reservas = get_all_reservas_from_week(sala_def=sala_id)
+    return render(request, 'reservas_app/sala_detail.html', {'sala': sala, 'reservas_list': list_reservas})
 
 @login_required()
 def buscarSala(request):
@@ -74,13 +83,63 @@ def buscarSala(request):
         return render(request, 'reservas_app/find.html', {'salas' : salas})
     return render(request, 'reservas_app/find.html',{'salas': None})
 
-def get_allReservas_from_week(fecha=now(), sala_def=None, docente_def=None):
-    lunes = fecha - timedelta(days=(fecha.weekday()-INICIO_SEMANA))
-    viernes = fecha + timedelta(days=(TERMINO_SEMANA - fecha.weekday()))
+def reservas_to_format(reservas_list):
+    """Esta funcion devuelve el horario completo semanal de un profesor o reserva."""
+    reservas_list = sorted(reservas_list, key=lambda x: x.comienzo)
+    p = get_periodo_actual()
+    c = Configuracion.objects.get(periodo=Periodo.objects.get(**p))
+    blocklist = c.get_blocklist()
+    grid = map(lambda x: [blocklist[x].get_string(),0,0,0,0,0],range(len(blocklist)))
 
+    for day in ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES']:
+        for i, block  in enumerate(blocklist):
+            for reserva in reservas_list:
+                aware_inicio = localtime(make_aware(datetime.combine(reserva.comienzo, block.inicio), get_default_timezone()))
+                aware_fin = localtime(make_aware(datetime.combine(reserva.comienzo, block.fin), get_default_timezone()))
+                local_r_comienzo = localtime(reserva.comienzo)
+                local_r_fin = localtime(reserva.fin)
+                print aware_inicio, aware_fin
+                if DAYS_TO_ID[day] == reserva.get_weekday():
+                    for hora in range(reserva.get_horas_academicas()-1):
+                        u"""Esto rellena inmediatamente las horas académicas siguientes cuando esta reserva ocupa más de 1 hora académica."""
+                        print "llegue a hora...", hora
+                        diff = timedelta(seconds=(c.duracion_hora_academica*60*hora))
+                        block_inicio = aware_inicio + diff
+                        block_fin = aware_fin + diff
+                        reserva_inicio = reserva.comienzo + diff
+                        reserva_inicio_to_compare = reserva_inicio + timedelta(seconds=c.duracion_hora_academica*60)
+                        if reserva_inicio >= block_inicio and reserva_inicio_to_compare <= block_fin:
+                            if i+hora <= len(grid):
+                                print "guarde"
+                                grid[i+hora][DAYS_TO_ID[day]+1] = reserva
+                            else:
+                                pass
+    return grid
+
+def  get_all_reservas_from_week(fecha=now(), sala_def=None, docente_def=None):
+    fecha_local = localtime(fecha)
+    fecha_superior = datetime(fecha_local.year,fecha_local.month, fecha_local.day-1, 0,0)
+    fecha_inferior = datetime(fecha_local.year,fecha_local.month, fecha_local.day, 0,0)
+
+    lunes = fecha_local - timedelta(days=(fecha_inferior.weekday()-INICIO_SEMANA))
+    viernes = fecha_local + timedelta(days=(TERMINO_SEMANA - fecha_superior.weekday()))
+
+    print 'viernes : %s' %viernes
+    print 'lunes : %s' %lunes
     if sala_def != None and docente_def != None:
         return None
-    if sala_def != None:
-        return Reserva.objects.filter(sala=sala_def, comienzo__gte=lunes, comienzo__lte=viernes)
-    if docente_def != None:
-        return  Reserva.objects.filter(docente=docente_def, comienzo__gte=lunes, comienzo__lte=viernes)
+    elif sala_def != None:
+        return Reserva.objects.filter(sala=sala_def, comienzo__range=(lunes, viernes))
+    elif docente_def != None:
+        return  Reserva.objects.filter(docente=docente_def, comienzo__range=(lunes, viernes))
+
+def get_periodo_actual():
+    if datetime.now().month > 6:
+        semestre_actual = 2
+    else:
+        semestre_actual = 1
+
+    return {'semestre':semestre_actual, 'year':datetime.now().year}
+
+
+

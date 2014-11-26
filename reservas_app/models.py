@@ -7,7 +7,24 @@ from django.utils.translation import ugettext as _
 from model_utils.managers import InheritanceManager
 from django.utils.timezone import now, timedelta, datetime
 
-
+DAYS_TO_ID = {
+    'LUNES':0,
+    'MARTES':1,
+    'MIERCOLES':2,
+    'JUEVES':3,
+    'VIERNES':4,
+    'SABADO':5,
+    'DOMINGO':6,
+}
+DAYS_TO_STRING = {
+    0:'LUNES',
+    1:'MARTES',
+    2:'MIERCOLES',
+    3:'JUEVES',
+    4:'VIERNES',
+    5:'SABADO',
+    6:'DOMINGO',
+}
 
 class UserInheritanceManager(InheritanceManager, UserManager):
     pass
@@ -42,8 +59,15 @@ class Reserva(models.Model):
     sala = models.ForeignKey('Sala')
     vigente = models.BooleanField(default=False)
 
+    #@property
     def __unicode__(self):
-        return self.sala.nombre + ' - ' + str(self.comienzo.time()) + ' - ' + self.asignatura.nombre + ' - ' + self.asignatura.docente.get_full_name()
+        return self.sala.nombre + ' - ' + DAYS_TO_STRING[self.comienzo.weekday()] + ' - ' + self.asignatura.nombre + ' - ' + self.asignatura.docente.get_full_name()
+
+    def get_horas_academicas(self):
+        return (self.fin - self.comienzo).seconds/60/45
+
+    def get_weekday(self):
+        return self.comienzo.weekday()
 
 class Asignatura(models.Model):
     codigo = models.CharField(max_length=15, primary_key=True, unique=True)
@@ -101,13 +125,51 @@ class Configuracion(models.Model):
     q_bloque_matutino = models.IntegerField(verbose_name="Cantidad de horas por bloque")
     inicio_bloque_vespertino = models.TimeField(verbose_name="Inicio de bloque vespertino")
     q_bloque_vespertino = models.IntegerField(verbose_name="Cantidad de horas por bloque")
-    periodo = models.ForeignKey('Periodo')
+    periodo = models.ForeignKey('Periodo', unique=True)
 
     def __unicode__(self):
         return str(self.duracion_hora_academica) + "min" + " - " + str(self.periodo)
 
-    def get_hora_academica(self):
-        return self.inicio_bloque_matutino
+    def get_blocklist(self):
+        class Block:
+            def __init__(self, inicio, fin):
+                self.inicio = inicio
+                self.fin = fin
+
+            def get_inicio2String(self):
+                return str(self.inicio).split('.')[0]
+
+            def get_fin2String(self):
+                return str(self.fin).split('.')[0]
+
+            def get_tuple(self):
+                return (self.inicio, self.fin)
+
+            def get_tuple_toString(self):
+                return (str(self.inicio).split('.')[0], str(self.fin).split('.')[0])
+
+            def get_string(self):
+                return str(self.inicio).split('.')[0] + ' - ' + str(self.fin).split('.')[0]
+
+        def addSecs(tm, secs):
+            fulldate = datetime(100, 1, 1, tm.hour, tm.minute, tm.second)
+            fulldate = fulldate + timedelta(seconds=secs)
+            return fulldate.time()
+
+        block_list = []
+        duracion = self.duracion_hora_academica * 60
+        recreo = 5 * 60
+        var = self.inicio_bloque_matutino
+        for n in range(self.q_bloque_matutino):
+            block_list.append(Block(var, addSecs(var, duracion)))
+            var = addSecs(var, duracion)
+            var = addSecs(var, recreo)
+        var = self.inicio_bloque_vespertino
+        for n in range(self.q_bloque_vespertino):
+            block_list.append(Block(var, addSecs(var, duracion)))
+            var = addSecs(var, duracion)
+            var = addSecs(var, recreo)
+        return block_list
 
 
 class Periodo(models.Model):

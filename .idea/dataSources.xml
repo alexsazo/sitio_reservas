@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="1535065717">
-    <data-source source="LOCAL" name="Django default" uuid="cc86e30b-9679-42a7-8493-88c1dc7f9584">
+  <component name="DataSourceManagerImpl" format="xml" hash="1495982903">
+    <data-source source="LOCAL" name="SQLite -" uuid="7d57b18d-701a-4417-b97a-b4e36ca339bc">
       <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/db.sqlite3</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="Django default" uuid="5a7c876f-e117-42b1-b7e5-fe3697f7d59b">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\Alex\PycharmProjects\sitio_reservas2\db.sqlite3</jdbc-url>
       <libraries />
     </data-source>
   </component>
