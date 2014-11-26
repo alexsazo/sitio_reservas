@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load activelink %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,7 +19,7 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static 'reservas_app/css/dashboard.css' %}" rel="stylesheet">
-
+    <link href="{% static 'reservas_app/css/bootstrap-datetimepicker.min.css' %}"
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
@@ -32,7 +33,9 @@
 
   <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -41,18 +44,23 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'home' %}">Horarios UnACh</a>
+          <a class="navbar-brand" href="{% url 'home' %}">
+              <span class="glyphicon glyphicon-calendar"></span> Horarios UnACh</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="{%  url 'home' %}">Inicio</a></li>
+            <li {% ifactive 'home' %} class="active" {% else %}{% endifactive %}><a href="{%  url 'home' %}">
+                <span class="glyphicon glyphicon-home"></span> Inicio</a></li>
             <li><a href="#">FOO</a></li>
             <li><a href="#">{{ user.get_full_name }}</a></li>
-            <li><a href="{% url 'logout' %}"> Salir  </a></li>
+            <li {% ifactive 'logout' %} {% else %}{% endifactive %}><a href="{% url 'logout' %}"> Salir  </a></li>
           </ul>
           <form class="navbar-form navbar-right" method="post" action="{% url 'buscar_sala' %}">{% csrf_token %}
+
             <input type="text" class="form-control" name='busqueda' placeholder="Buscar sala...">
-            <button class="btn" type="submit">Buscar</button>
+            <button class="btn btn-success" type="submit">
+                <span class="glyphicon glyphicon-search"></span> Buscar
+            </button>
           </form>
         </div>
       </div>
@@ -81,6 +89,15 @@
     <script src="{% static 'reservas_app/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'reservas_app/js/docs.min.js' %}"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
     <script src="{% static 'reservas_app/js/ie10-viewport-bug-workaround.js' %}"></script>
-  </body>
+    <script src="{% static 'reservas_app/js/moment.js' %}"></script>
+    <script src="{% static 'reservas_app/js/bootstrap-datetimepicker.js' %}"></script>
+
+    <script>
+        {% block scripts %}
+
+        {% endblock scripts %}
+    </script>
+</body>
 </html>

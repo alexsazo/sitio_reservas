@@ -137,19 +137,26 @@ class Configuracion(models.Model):
                 self.fin = fin
 
             def get_inicio2String(self):
-                return str(self.inicio).split('.')[0]
+                st = (str(self.inicio).split('.')[0]).split(':')
+                return st[0] +':'+ st[1]
 
             def get_fin2String(self):
-                return str(self.fin).split('.')[0]
+                st = (str(self.fin).split('.')[0]).split(':')
+                return st[0] +':'+ st[1]
 
             def get_tuple(self):
                 return (self.inicio, self.fin)
 
             def get_tuple_toString(self):
-                return (str(self.inicio).split('.')[0], str(self.fin).split('.')[0])
+                st1 = (str(self.inicio).split('.')[0]).split(':')
+                st2 = (str(self.fin).split('.')[0]).split(':')
+                return st1[0]+':'+st1[1] + " - " + st2[0]+':'+st2[1]
 
             def get_string(self):
-                return str(self.inicio).split('.')[0] + ' - ' + str(self.fin).split('.')[0]
+                st1 = (str(self.inicio).split('.')[0]).split(':')
+                st2 = (str(self.fin).split('.')[0]).split(':')
+                return st1[0]+':'+st1[1] + " - " + st2[0]+':'+st2[1]
+                #return str(self.inicio).split('.')[0] + ' - ' + str(self.fin).split('.')[0]
 
         def addSecs(tm, secs):
             fulldate = datetime(100, 1, 1, tm.hour, tm.minute, tm.second)

@@ -1,11 +1,11 @@
 {% extends 'reservas_app/base.html' %}
 
 {% block title_page %}
-    {{ sala.nombre }} - Horario
+    {{ docente.get_full_name }} - Horario
 {% endblock title_page %}
 
 {% block content %}
-    <h1 class="page-header" align="center">{{ sala.nombre }}</h1>
+    <h1 class="page-header" align="center">{{ docente.get_full_name }}</h1>
 <h2 class="sub-header" align="center">Horario</h2>
 <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover table-sortable">
@@ -28,9 +28,9 @@
                 {% elif column == 0 %}
                     <td class="text-center">--</td>
                 {% elif column.vigente %}
-                    <td class="text-center"><a href="{% url 'asignatura_detalle' column.asignatura.pk  %}" class="btn btn-default">{{ column.asignatura }}</a>
+                    <td class="text-center" ><a href="{% url 'asignatura_detalle' column.asignatura.pk %}" class="btn btn-default">{{ column.asignatura }}</a>
                         <br>
-                        <b><a href="{% url 'docente_detalle' column.asignatura.docente.id %}" class="label label-default">{{ column.asignatura.docente.get_full_name }}</a></b>
+                        <b><a class="label label-default" href="{% url 'sala_detalle' column.sala.pk %}">{{ column.sala.nombre }}</a> </b>
                     </td>
                 {% endif %}
             {% endfor %}

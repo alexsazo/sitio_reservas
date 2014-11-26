@@ -1,0 +1,65 @@
+{% extends 'reservas_app/base.html' %}
+
+{% block title_page %}
+    {{ asignatura.nombre }} - Horario
+{% endblock title_page %}
+
+{% block content %}
+    <h1 class="page-header" align="center">{{ asignatura.codigo | upper }} - {{ asignatura.nombre }}</h1>
+    <h2 class="sub-header" align="center">Horario</h2>
+    <form>
+     <div class="row">
+        <div class='col-sm-6'>
+            <div class="form-group">
+                <div class='input-group date datetime' id="datetimepicker1">
+                    <input type='text' class="form-control" />
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+    <ul class="pager">
+        <li ><a href="#">&larr; Semana anterior</a></li>
+        <li ><a href="#">Semana siguiente &rarr;</a></li>
+    </ul>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover table-sortable">
+            <thead>
+            <tr>
+                <th>Bloque</th>
+                <th class="text-center">Lunes</th>
+                <th class="text-center">Martes</th>
+                <th class="text-center">Miércoles</th>
+                <th class="text-center">Jueves</th>
+                <th class="text-center">Viernes</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in reservas_list %}
+                <tr>
+                    {% for column in row %}
+                        {% if forloop.first %}
+                            <td ><p class="btn btn-primary">{{ column }}</p></td>
+                        {% elif column == 0 %}
+                            <td class="text-center">--</td>
+                        {% elif column.vigente %}
+                            <td class="text-center" class="active" ><a class="btn btn-default" href="{% url 'docente_detalle' column.asignatura.docente.id %}">{{ column.asignatura.docente.get_full_name }}</a>
+                                <br>
+                                <b><a class="label label-default" href="{% url 'sala_detalle' column.sala.pk %}">{{ column.sala.nombre }}</a> </b>
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
+
+{% block scripts %}
+            $(function () {
+                $('#datetimepicker1').datetimepicker();
+            });
+{% endblock scripts %}

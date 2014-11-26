@@ -2,6 +2,6 @@
 
 {% block content %}
     {% for sala in salas %}
-        <li><a href="{% url 'sala' sala.id %}">{{ sala.nombre }}</a> </li>
+        <li><a href="{% url 'sala_detalle' sala.id %}">{{ sala.nombre }}</a> </li>
     {% endfor %}
 {% endblock content %}

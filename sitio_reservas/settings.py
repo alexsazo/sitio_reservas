@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'reservas_app',
     'django_bootstrap_calendar',
+    'activelink',
 )
 
 MIDDLEWARE_CLASSES = (

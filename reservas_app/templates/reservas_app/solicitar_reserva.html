@@ -1,0 +1,72 @@
+{% extends base.html %}
+{% load staticfiles %}
+
+{% block content %}
+<form class="form-horizontal" method="post">
+{% csrf_token %}
+<fieldset>
+
+<!-- Form Name -->
+<legend>Form Name</legend>
+
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="textinput">Fecha-hora de inicio</label>
+  <div class="col-md-5">
+  <input id="textinput" name="comienzo" type="text" placeholder="fecha-hora de inicio" class="form-control input-md" required="">
+  <span class="help-block">Ponga la fecha y la hora en que comienza su clase.</span>
+  </div>
+</div>
+
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="fin">Hora de término</label>
+  <div class="col-md-5">
+  <input id="fin" name="fin" type="text" placeholder="hora de término" class="form-control input-md" required="">
+  <span class="help-block">Ponga la fecha y la hora en que termina su clase.</span>
+  </div>
+</div>
+
+<div class="form-group">
+    <label class="col-md-4 control-label" for="asignatura">Asignatura</label>
+    <div class="col-md-5">
+        <select id="asignatura" name="asignatura" class="form-control">
+        </select>
+    </div>
+</div>
+
+<!-- Select Multiple -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="sala">Sala que desea solicitar</label>
+  <div class="col-md-5">
+    <select id="sala" name="sala" class="form-control" multiple="multiple">
+    </select>
+  </div>
+</div>
+
+<!-- Multiple Checkboxes -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="serie">Repetición</label>
+  <div class="col-md-4">
+  <div class="checkbox">
+    <label for="serie-0">
+      <input type="checkbox" name="serie" id="serie-0" value="1">
+      Se repite todas las semanas.
+    </label>
+	</div>
+  </div>
+</div>
+
+<!-- Button (Double) -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="submit"></label>
+  <div class="col-md-8">
+    <button id="submit" name="submit" class="btn btn-success">Reservar</button>
+    <button id="clean" name="clean" class="btn btn-danger">Limpiar</button>
+  </div>
+</div>
+
+</fieldset>
+</form>
+
+{% endblock %}

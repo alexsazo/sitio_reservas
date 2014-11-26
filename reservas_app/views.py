@@ -1,10 +1,12 @@
 # coding=utf-8
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect, get_object_or_404
-from reservas_app.models import Sala, Reserva, Configuracion, Periodo
+from reservas_app.forms import ReservaForm
+from reservas_app.models import Sala, Reserva, Configuracion, Periodo, Docente, Asignatura
+from django.views.generic import ListView, CreateView
 
 from django.utils.timezone import now, timedelta, datetime, make_aware, localtime, get_default_timezone
 
@@ -31,12 +33,18 @@ DAYS_TO_STRING = {
 INICIO_SEMANA = DAYS_TO_ID['LUNES']
 TERMINO_SEMANA = DAYS_TO_ID['VIERNES']
 
+class DocenteListView(ListView):
+    model = Docente
+    template_name = 'reservas_app/lista_docentes.html'
+
+
 def iniciar_sesion(request):
     if request.method == "POST":
         formulario = AuthenticationForm(request.POST)
         if formulario.is_valid:
             username = request.POST['username']
             password = request.POST['password']
+
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
@@ -53,6 +61,37 @@ def iniciar_sesion(request):
         formulario = AuthenticationForm()
     return render(request, 'registration/login.html', {'formulario': formulario})
 
+
+def validar_usuario_docente(u):
+    try:
+        var = u.docente
+        return True
+    except:
+        return False
+
+@login_required(login_url="/reservas/login/")
+@user_passes_test(lambda u: validar_usuario_docente(u))
+def solicitar_sala(request):
+    docente = request.user.docente
+    if request.method == "POST":
+        form = ReservaForm(request.POST)
+        if form.is_valid():
+            docente.solicitar_reserva(**form.cleaned_data)
+    return render(request, 'reservas_app/solicitar_reserva.html' )
+
+
+def validar_usuario_jefazo(u):
+     try:
+        var = u.jefazo
+        return True
+     except:
+        return False
+
+@login_required()
+@user_passes_test(lambda u: validar_usuario_jefazo(u))
+def listar_docentes(request):
+    docentes_list = Docente.objects.all()
+    render(request, 'reservas_app/listar_docentes.html', {'docentes': docentes_list})
 
 @login_required(login_url="/reservas/login/")
 def home(request):
@@ -71,10 +110,26 @@ def profile(request):
     return render(request, 'reservas_app/profile.html')
 
 @login_required()
-def sala(request, sala_id):
+def sala_detalle(request, sala_id):
     sala = get_object_or_404(Sala, pk=sala_id)
-    list_reservas = get_all_reservas_from_week(sala_def=sala_id)
+    list = get_all_reservas_from_week(sala_def=sala_id)
+    list_reservas = reservas_to_format(list)
     return render(request, 'reservas_app/sala_detail.html', {'sala': sala, 'reservas_list': list_reservas})
+
+@login_required()
+def docente_detalle(request, docente_id):
+    docente = get_object_or_404(Docente, id=docente_id)
+    list = get_all_reservas_from_week(docente_def=docente.pk)
+    list_reservas = reservas_to_format(list)
+    return render(request, 'reservas_app/docente_detalle.html', {'docente': docente, 'reservas_list': list_reservas})
+
+@login_required()
+def asignatura_detalle(request, asignatura_id):
+    asignatura = get_object_or_404(Asignatura, pk=asignatura_id)
+    list = []
+    list = get_all_reservas_from_week(asignatura_def=asignatura_id)
+    list_reservas = reservas_to_format(list)
+    return render(request, 'reservas_app/asignatura_detalle.html', {'asignatura': asignatura, 'reservas_list': list_reservas})
 
 @login_required()
 def buscarSala(request):
@@ -100,7 +155,7 @@ def reservas_to_format(reservas_list):
                 local_r_fin = localtime(reserva.fin)
                 print aware_inicio, aware_fin
                 if DAYS_TO_ID[day] == reserva.get_weekday():
-                    for hora in range(reserva.get_horas_academicas()-1):
+                    for hora in range(reserva.get_horas_academicas()):
                         u"""Esto rellena inmediatamente las horas académicas siguientes cuando esta reserva ocupa más de 1 hora académica."""
                         print "llegue a hora...", hora
                         diff = timedelta(seconds=(c.duracion_hora_academica*60*hora))
@@ -114,9 +169,10 @@ def reservas_to_format(reservas_list):
                                 grid[i+hora][DAYS_TO_ID[day]+1] = reserva
                             else:
                                 pass
+    print "mi grid: ", grid
     return grid
 
-def  get_all_reservas_from_week(fecha=now(), sala_def=None, docente_def=None):
+def  get_all_reservas_from_week(fecha=now(), sala_def=None, docente_def=None, asignatura_def=None):
     fecha_local = localtime(fecha)
     fecha_superior = datetime(fecha_local.year,fecha_local.month, fecha_local.day-1, 0,0)
     fecha_inferior = datetime(fecha_local.year,fecha_local.month, fecha_local.day, 0,0)
@@ -126,13 +182,13 @@ def  get_all_reservas_from_week(fecha=now(), sala_def=None, docente_def=None):
 
     print 'viernes : %s' %viernes
     print 'lunes : %s' %lunes
-    if sala_def != None and docente_def != None:
-        return None
-    elif sala_def != None:
-        return Reserva.objects.filter(sala=sala_def, comienzo__range=(lunes, viernes))
-    elif docente_def != None:
-        return  Reserva.objects.filter(docente=docente_def, comienzo__range=(lunes, viernes))
 
+    if sala_def:
+        return Reserva.objects.filter(sala=sala_def, comienzo__range=(lunes, viernes))
+    elif docente_def:
+        return  Reserva.objects.filter(asignatura=get_object_or_404(Asignatura, docente=docente_def), comienzo__range=(lunes, viernes))
+    elif asignatura_def:
+        return  Reserva.objects.filter(asignatura=asignatura_def, comienzo__range=(lunes, viernes))
 def get_periodo_actual():
     if datetime.now().month > 6:
         semestre_actual = 2

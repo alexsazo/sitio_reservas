@@ -4,26 +4,28 @@
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>Horario</th>
-            <th>Lunes</th>
-            <th>Martes</th>
-            <th>Miércoles</th>
-            <th>Jueves</th>
-            <th>Viernes</th>
+            <th text-align="center">Bloque</th>
+            <th text-align="center">Lunes</th>
+            <th text-align="center">Martes</th>
+            <th text-align="center">Miércoles</th>
+            <th text-align="center">Jueves</th>
+            <th text-align="center">Viernes</th>
         </tr>
         </thead>
         <tbody>
-        {% for block in reservas_list %}
+        {% for row in calendar_list %}
         <tr>
-            <td>{{  }}</td>
-            <td>Lorem</td>
-            <td>ipsum</td>
-            <td>dolor</td>
-            <td>sit</td>
-            <td>sit</td>
+            {% for column in row %}
+                {% if forloop.first %}
+                    <td><p class="btn btn-primary">{{ column }}</p></td>
+                {% elif column == 0 %}
+                    <td ">Vacío</td>
+                {% else %}
+                    <td ><a href="{% url 'asignatura_detalle' column.asignatura.pk %}" class="btn btn-default">{{ column.asignatura }}</a><br> <b><a href="{% url 'docente_detalle' column.asignatura.docente.id %}" class="label label-default">{{ column.asignatura.docente.get_full_name }}</a></b></td>
+                {% endif %}
+            {% endfor %}
         </tr>
         {% endfor %}
-
         </tbody>
     </table>
 </div>
